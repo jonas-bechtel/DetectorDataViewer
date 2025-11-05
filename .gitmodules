@@ -1,0 +1,6 @@
+[submodule "DetectorDataViewer/vendor/imgui"]
+	path = DetectorDataViewer/vendor/imgui
+	url = https://github.com/jonas-bechtel/imgui.git
+[submodule "DetectorDataViewer/vendor/implot"]
+	path = DetectorDataViewer/vendor/implot
+	url = https://github.com/jonas-bechtel/implot.git
