@@ -1,9 +1,10 @@
 #include "DataHandler.h"
 #include "implot.h"
+#include "imgui.h"
 
-#include <windows.h>
-#include <shlobj.h>
-#include <shobjidl.h>
+//#include <windows.h>
+//#include <shlobj.h>
+//#include <shobjidl.h>
 #include <string>
 #include <locale>
 #include <codecvt>
@@ -203,8 +204,8 @@ void DataHandler::PlotDataSegmentVoltages(int i)
     
     double frameSpan = ImPlot::GetPlotLimits().X.Size();
     float dataInFrameRatio = (dataSegments[i].endTime - dataSegments[i].startTime) / frameSpan;
-    dataInFrameRatio = min(1, dataInFrameRatio);
-    dataInFrameRatio = max(0.2, dataInFrameRatio);
+    dataInFrameRatio = std::min(1.0f, dataInFrameRatio);
+    dataInFrameRatio = std::max(0.2f, dataInFrameRatio);
 
     // maybe adjust downsample factor
     int downsample = (int)frameSpan / (5000 * dataInFrameRatio + 1) + 1;
@@ -238,8 +239,8 @@ void DataHandler::PlotDataSegmentCurrents(int i)
 
     double frameSpan = ImPlot::GetPlotLimits().X.Size();
     float dataInFrameRatio = (dataSegments[i].endTime - dataSegments[i].startTime) / frameSpan;
-    dataInFrameRatio = min(1, dataInFrameRatio);
-    dataInFrameRatio = max(0.2, dataInFrameRatio);
+    dataInFrameRatio = std::min(1.0f, dataInFrameRatio);
+    dataInFrameRatio = std::max(0.2f, dataInFrameRatio);
 
     // maybe adjust downsample factor
     int downsample = (int)frameSpan / (5000 * dataInFrameRatio + 1) + 1;
@@ -255,6 +256,101 @@ void DataHandler::PlotDataSegmentCurrents(int i)
         {
             ImPlot::PlotLine(da.name.c_str(), &dataSegments[i].times.data()[start], &da.data[start], size, 0, 0, sizeof(double) * downsample);
         }
+    }
+}
+
+void DataHandler::ShowWindow()
+{
+    ImGui::DockSpaceOverViewport();
+
+    if (ImGui::Begin("Plot Window"))
+    {
+        if (HasData())
+        {
+            if (ImPlot::BeginAlignedPlots("AlignedGroup"))
+            {
+                if (ImPlot::BeginPlot("Voltage", ImVec2(-1, ImGui::GetContentRegionAvail().y / 2)))
+                {
+                    ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+                    ImPlot::SetupAxisLinks(ImAxis_X1, &plotLims.X.Min, &plotLims.X.Max);
+
+                    for (int i = 0; i < Size(); i++)
+                    {
+                        PlotDataSegmentVoltages(i);
+                    }
+                    ImPlot::EndPlot();
+                }
+
+                if (ImPlot::BeginPlot("Currents", ImVec2(-1, -1)))
+                {
+                    ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+                    ImPlot::SetupAxisLinks(ImAxis_X1, &plotLims.X.Min, &plotLims.X.Max);
+
+                    for (int i = 0; i < Size(); i++)
+                    {
+                        PlotDataSegmentCurrents(i);
+                    }
+                    ImPlot::EndPlot();
+                }
+                ImPlot::EndAlignedPlots();
+            }
+        }
+
+        ImGui::End();
+    }
+
+    if (ImGui::Begin("Data Segment List"))
+    {
+        if (ImGui::Button("Load Data"))
+        {
+            std::filesystem::path dataFile = SelectFile("data\\", { "*.txt" });
+
+            if (dataFile != "")
+            {
+                auto startTime = std::chrono::high_resolution_clock::now();
+
+                LoadData(dataFile.string());
+                plotLims = ImPlotRect(GetSmallestTime(), GetLargestTime(), 0, 1);
+
+                auto endTime = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+                std::cout << "it took " << (float)duration.count() / 1000 << " seconds\n";
+            }
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Clear Data"))
+        {
+            ClearData();
+        }
+
+        static int item_current_idx = 0;
+
+        if (ImGui::BeginListBox("Dates", ImVec2(-FLT_MIN, -1)))
+        {
+            for (int n = 0; n < Size(); n++)
+            {
+
+                const bool is_selected = (item_current_idx == n);
+                std::string text = GetData(n).startDate + " -> " + GetData(n).endDate;
+
+                if (ImGui::Selectable(text.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
+                {
+                    item_current_idx = n;
+                    if (ImGui::IsMouseDoubleClicked(0))
+                    {
+                        plotLims = ImPlotRect(GetData(n).startTime, GetData(n).endTime, 0, 1);
+                    }
+                }
+
+                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndListBox();
+        }
+        ImGui::End();
     }
 }
 

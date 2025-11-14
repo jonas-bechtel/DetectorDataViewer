@@ -136,7 +136,7 @@ int main(int, char**)
 
     // Our state
     DataHandler dataHandler = DataHandler();
-    ImPlotRect plotLims;
+    
 
     ImPlot::GetStyle().Use24HourClock = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -165,97 +165,7 @@ int main(int, char**)
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 
-        ImGui::DockSpaceOverViewport();
-
-        if (ImGui::Begin("Plot Window"))
-        {
-            if (dataHandler.HasData())
-            {
-                if (ImPlot::BeginAlignedPlots("AlignedGroup"))
-                {
-                    if (ImPlot::BeginPlot("Voltage", ImVec2(-1, ImGui::GetContentRegionAvail().y / 2)))
-                    {
-                        ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-                        ImPlot::SetupAxisLinks(ImAxis_X1, &plotLims.X.Min, &plotLims.X.Max);
-
-                        for (int i = 0; i < dataHandler.Size(); i++)
-                        {
-                            dataHandler.PlotDataSegmentVoltages(i);
-                        }
-                        ImPlot::EndPlot();
-                    }
-
-                    if (ImPlot::BeginPlot("Currents", ImVec2(-1, -1)))
-                    {
-                        ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-                        ImPlot::SetupAxisLinks(ImAxis_X1, &plotLims.X.Min, &plotLims.X.Max);
-
-                        for (int i = 0; i < dataHandler.Size(); i++)
-                        {
-                            dataHandler.PlotDataSegmentCurrents(i);
-                        }
-                        ImPlot::EndPlot();
-                    }
-                    ImPlot::EndAlignedPlots();
-                }
-            }
-
-            ImGui::End();
-        }
-
-        if (ImGui::Begin("Data Segment List"))
-        {
-            if (ImGui::Button("Load Data"))
-            {
-                std::filesystem::path dataFile = dataHandler.SelectFile("data\\", { "*.txt" });
-
-                if (dataFile != "")
-                {
-                    auto startTime = std::chrono::high_resolution_clock::now();
-
-                    dataHandler.LoadData(dataFile.string());
-                    plotLims = ImPlotRect(dataHandler.GetSmallestTime(), dataHandler.GetLargestTime(), 0, 1);
-
-                    auto endTime = std::chrono::high_resolution_clock::now();
-                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-                    std::cout << "it took " << (float)duration.count() / 1000 << " seconds\n";
-                }
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Clear Data"))
-            {
-                dataHandler.ClearData();
-            }
-
-            static int item_current_idx = 0;
-
-            if (ImGui::BeginListBox("Dates", ImVec2(-FLT_MIN, -1)))
-            {
-                for (int n = 0; n < dataHandler.Size(); n++)
-                {
-
-                    const bool is_selected = (item_current_idx == n);
-                    std::string text = dataHandler.GetData(n).startDate + " -> " + dataHandler.GetData(n).endDate;
-
-                    if (ImGui::Selectable(text.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
-                    {
-                        item_current_idx = n;
-                        if (ImGui::IsMouseDoubleClicked(0))
-                        {
-                            plotLims = ImPlotRect(dataHandler.GetData(n).startTime, dataHandler.GetData(n).endTime, 0, 1);
-                        }
-                    }
-
-                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                    if (is_selected)
-                        ImGui::SetItemDefaultFocus();
-                }
-                ImGui::EndListBox();
-            }
-            ImGui::End();
-        }
+		dataHandler.ShowWindow();
 
         // Rendering
         ImGui::Render();

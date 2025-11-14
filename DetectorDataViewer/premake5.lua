@@ -12,8 +12,8 @@ project "DetectorDataViewer"
 
 	files	
 	{
-		"src/**.h",
-		"src/**.cpp"
+		"src/DataHandler.h",
+		"src/DataHandler.cpp"
 	}
 
 	includedirs
@@ -45,14 +45,20 @@ project "DetectorDataViewer"
 			"d3dcompiler",
 			"dxgi"
 		}
-		
-		postbuildcommands
+
+		files
 		{
-			--'cmd /c if exist vendor\\JSPEC\\lib\\*.dll xcopy /Q /Y /I vendor\\JSPEC\\lib\\*.dll "%{cfg.targetdir}" > nul',
-			--'{COPY} "%{cfg.buildtarget.relpath}" "..\\..\\Energy Distribution Model Release"',
-			--'{COPY} "imgui.ini" "..\\..\\Energy Distribution Model Release"'
+			"src/mainWindows.cpp"
 		}
+		
     
+	filter "system:linux"
+		systemversion "latest"
+
+		files
+		{
+			"src/mainLinux.cpp"
+		}
 
 	filter "configurations:Debug"
 		defines "_DEBUG"

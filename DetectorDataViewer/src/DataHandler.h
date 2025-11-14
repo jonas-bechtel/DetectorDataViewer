@@ -4,6 +4,8 @@
 #include <fstream>
 #include <filesystem>
 
+#include "implot.h"
+
 struct DataArray
 {
     std::vector<double> data;
@@ -48,6 +50,8 @@ public:
 	void PlotDataSegmentVoltages(int i);
 	void PlotDataSegmentCurrents(int i);
 
+	void ShowWindow();
+
 private:
 	void ProcessLine(std::string& line);
 	std::string SecondsToDate(double seconds);
@@ -55,5 +59,7 @@ private:
 private:
 	std::vector<DataSegment> dataSegments;
 	DataSegment currentSegment;
+
+	ImPlotRect plotLims;
 };
 
