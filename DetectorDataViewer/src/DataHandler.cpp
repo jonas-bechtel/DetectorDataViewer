@@ -303,7 +303,7 @@ void DataHandler::ShowWindow()
     {
         if (ImGui::Button("Load Data"))
         {
-            std::filesystem::path dataFile = SelectFile("data\\", { "*.txt" });
+            std::filesystem::path dataFile = SelectFile("data", { "*.txt" });
 
             if (dataFile != "")
             {
