@@ -7,9 +7,6 @@ project "DetectorDataViewer"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-	--pchheader "pch.h"
-	--pchsource "src/pch.cpp"
-
 	files	
 	{
 		"src/DataHandler.h",
@@ -23,10 +20,6 @@ project "DetectorDataViewer"
 		"%{wks.location}/DetectorDataViewer/vendor/imgui/backends",
 		"%{wks.location}/DetectorDataViewer/vendor/implot",
 		"%{wks.location}/DetectorDataViewer/vendor/tinyfiledialogs"
-	}
-
-	libdirs 
-	{
 	}
 
 	links
@@ -54,6 +47,18 @@ project "DetectorDataViewer"
     
 	filter "system:linux"
 		systemversion "latest"
+		pic "On"
+
+		includedirs
+		{
+			"/usr/include/SDL2"
+		}
+
+		links 
+		{
+			"SDL2",
+			"GL"
+    	}
 
 		files
 		{
