@@ -3,11 +3,12 @@ import os
 from pathlib import Path
 
 import Utils
+import platform
 
 class PremakeConfiguration:
     premakeVersion = "5.0.0-beta7"
-    #premakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-windows.zip"
-    premakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-linux.tar.gz"
+    premakeZipUrlsWindows = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-windows.zip"
+    premakeZipUrlsLinux = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-linux.tar.gz"
     premakeLicenseUrl = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
     premakeDirectory = "./vendor/premake/bin"
 
@@ -38,10 +39,16 @@ class PremakeConfiguration:
                 return False
             permissionGranted = (reply == 'y')
 
-        #premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-windows.zip"
-        premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-linux.tar.gz"
-        print("Downloading {0:s} to {1:s}".format(cls.premakeZipUrls, premakePath))
-        Utils.DownloadFile(cls.premakeZipUrls, premakePath)
+        if platform.system() == "Windows":
+            premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-windows.zip"
+            print("Downloading {0:s} to {1:s}".format(cls.premakeZipUrlsWindows, premakePath))
+            Utils.DownloadFile(cls.premakeZipUrlsWindows, premakePath)
+
+        if platform.system() == "Linux":
+            premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-linux.tar.gz"
+            print("Downloading {0:s} to {1:s}".format(cls.premakeZipUrlsLinux, premakePath))
+            Utils.DownloadFile(cls.premakeZipUrlsLinux, premakePath)
+
         print("Extracting", premakePath)
         Utils.UnzipFile(premakePath, deleteZipFile=True)
         print(f"Premake {cls.premakeVersion} has been downloaded to '{cls.premakeDirectory}'")
