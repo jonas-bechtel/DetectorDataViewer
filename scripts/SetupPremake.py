@@ -5,8 +5,9 @@ from pathlib import Path
 import Utils
 
 class PremakeConfiguration:
-    premakeVersion = "5.0.0-beta1"
-    premakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-windows.zip"
+    premakeVersion = "5.0.0-beta7"
+    #premakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-windows.zip"
+    premakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-linux.tar.gz"
     premakeLicenseUrl = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
     premakeDirectory = "./vendor/premake/bin"
 
@@ -22,7 +23,8 @@ class PremakeConfiguration:
     @classmethod
     def CheckIfPremakeInstalled(cls):
         premakeExe = Path(f"{cls.premakeDirectory}/premake5.exe");
-        if (not premakeExe.exists()):
+        premakeBinLinux = Path(f"{cls.premakeDirectory}/premake5");
+        if (not premakeExe.exists() and not premakeBinLinux.exists()):
             return cls.InstallPremake()
 
         return True
@@ -36,7 +38,8 @@ class PremakeConfiguration:
                 return False
             permissionGranted = (reply == 'y')
 
-        premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-windows.zip"
+        #premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-windows.zip"
+        premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-linux.tar.gz"
         print("Downloading {0:s} to {1:s}".format(cls.premakeZipUrls, premakePath))
         Utils.DownloadFile(cls.premakeZipUrls, premakePath)
         print("Extracting", premakePath)
