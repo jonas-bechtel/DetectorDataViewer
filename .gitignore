@@ -26,6 +26,8 @@ bin-int/
 **.vcxproj.*
 **.csproj
 
+Makefile
+
 # User-specific files
 *.rsuser
 *.suo
